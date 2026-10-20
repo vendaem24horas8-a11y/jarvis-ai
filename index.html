@@ -1,0 +1,365 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050914">
+<title>J.A.R.V.I.S. — AI System</title>
+<style>
+:root{--bg:#050914;--panel:#0a1424;--line:#173c58;--blue:#36cfff;--cyan:#8beaff;--muted:#7295aa;--text:#e4f7ff}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% 0%,#102a43 0%,var(--bg) 52%);color:var(--text);font-family:Inter,Arial,sans-serif;min-height:100vh}
+button,input{font:inherit}
+button{cursor:pointer}
+header{height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--line);background:#050914d9;position:sticky;top:0;z-index:3;backdrop-filter:blur(14px)}
+.brand{font-weight:800;letter-spacing:3px;color:var(--cyan)}.brand small{display:block;font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px}
+.status{font-size:10px;color:#75f7bf;letter-spacing:1px}
+main{max-width:1100px;margin:auto;padding:22px 16px 40px}
+.dashboard{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{background:linear-gradient(145deg,#0b1929ed,#07101df2);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0;box-shadow:0 8px 35px #0003}
+.section-label{font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:12px}
+.core-panel{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:10px;min-height:290px}
+.core-wrap{height:260px;display:grid;place-items:center;position:relative;overflow:hidden}
+.core{width:174px;height:174px;border-radius:50%;position:relative;display:grid;place-items:center;animation:float 4s ease-in-out infinite}
+.core:before,.core:after{content:"";position:absolute;inset:0;border-radius:50%;border:1px solid var(--blue);box-shadow:0 0 18px #36cfff38,inset 0 0 18px #36cfff22}
+.core:before{inset:-15px;border-style:dashed;animation:spin 18s linear infinite}
+.core:after{inset:-29px;border-color:#2278a7;animation:spin 12s linear infinite reverse}
+.core-inner{width:118px;height:118px;border-radius:50%;border:2px solid var(--cyan);background:radial-gradient(circle,#167ba0 0%,#0b2745 45%,#06101f 75%);box-shadow:0 0 30px #36cfff65,inset 0 0 25px #36cfff65;display:grid;place-items:center}
+.arc{position:absolute;inset:-42px;border-radius:50%;border:2px solid transparent;border-top-color:var(--cyan);border-bottom-color:#25618c;animation:spin 6s linear infinite}
+.core svg{width:58px;filter:drop-shadow(0 0 10px #8beaff)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes float{50%{transform:translateY(-7px)}}
+.core-panel.listening .core-inner{box-shadow:0 0 50px #36cfff;background:radial-gradient(circle,#32cfff,#09213e)}
+.core-panel.thinking .core{animation:float 1s ease-in-out infinite}
+h1{font-size:clamp(24px,4vw,37px);margin:0 0 10px;letter-spacing:1px}
+.subtitle{font-size:13px;color:var(--muted);line-height:1.7}
+.metrics{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.metric{border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:10px;color:var(--muted)}
+.metric b{display:block;color:var(--cyan);font-size:12px;margin-top:5px}
+.chat{display:flex;flex-direction:column;min-height:340px}
+.messages{display:flex;flex-direction:column;gap:12px;max-height:340px;overflow:auto;padding:4px 2px 12px}
+.msg{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;font-size:13px;padding:12px;border-radius:10px;max-width:94%}
+.msg.ai{align-self:flex-start;background:#0c2235;border:1px solid #174461}
+.msg.user{align-self:flex-end;background:#10384a;border:1px solid #23708a}
+.msg .who{display:block;font-size:9px;letter-spacing:1px;color:var(--cyan);margin-bottom:6px}
+.composer{display:flex;gap:7px;margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}
+.composer input{min-width:0;flex:1;background:#050d18;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:12px;outline:none}
+.composer input:focus{border-color:var(--blue)}
+.btn{border:1px solid #245b78;border-radius:8px;background:#0d2b40;color:var(--cyan);padding:10px 12px}
+.btn:hover{background:#16415a}
+.btn.primary{background:#0c7493;color:white;border-color:#37cfff}
+.btn:disabled{opacity:.4;cursor:wait}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.task-add{display:flex;gap:7px}
+.task-add input{min-width:0;flex:1;background:#050d18;border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--text)}
+.tasks{display:grid;gap:8px;margin-top:14px}
+.task{display:flex;gap:10px;align-items:center;font-size:12px;color:#b8d3e3;padding:10px;background:#081522;border-radius:7px}
+.task input{accent-color:#36cfff}
+.task span{flex:1;overflow-wrap:anywhere}
+.task.done span{text-decoration:line-through;color:#668093}
+.task button{background:none;border:0;color:#7595a8;font-size:17px}
+.footer{text-align:center;color:#4c7187;font-size:10px;letter-spacing:1px;margin-top:24px}
+@media(max-width:650px){header{padding:0 13px}.dashboard{grid-template-columns:1fr} .core-panel{grid-column:auto;grid-template-columns:1fr;text-align:center;padding-top:10px}.core-wrap{height:225px}.core{transform:scale(.88)}.metrics{justify-content:center}.panel{padding:14px}.chat{min-height:320px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">J.A.R.V.I.S.<small>PERSONAL AI SYSTEM</small></div>
+  <div class="status" id="status">● SYSTEM ONLINE</div>
+</header>
+
+<main>
+<div class="dashboard">
+  <section class="panel core-panel" id="corePanel">
+    <div class="core-wrap">
+      <div class="core">
+        <div class="arc"></div>
+        <div class="core-inner">
+          <svg viewBox="0 0 100 100" fill="none" aria-label="Núcleo holográfico">
+            <path d="M50 12 80 29 80 68 50 86 20 68 20 32Z" stroke="#8beaff" stroke-width="1.5"/>
+            <path d="M50 24 69 36 65 61 50 74 35 61 31 36Z" stroke="#36cfff" stroke-width="2"/>
+            <circle cx="50" cy="49" r="12" stroke="#d8faff" stroke-width="2"/>
+            <circle cx="50" cy="49" r="4" fill="#d8faff"/>
+            <path d="M50 4V20 M50 78V96 M4 50H22 M78 50H96" stroke="#8beaff"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">INTERFACE NEURAL // V1.0</div>
+      <h1>À sua disposição.</h1>
+      <div class="subtitle" id="coreStatus">Sistemas visuais ativos. Aguardando sua solicitação.</div>
+      <div class="metrics">
+        <div class="metric">NÚCLEO<b id="coreState">STANDBY</b></div>
+        <div class="metric">IA<b id="aiState">AGUARDANDO</b></div>
+        <div class="metric">MEMÓRIA<b>LOCAL</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel chat">
+    <div class="section-label">01 / INTERFACE DE CONVERSAÇÃO</div>
+    <div class="messages" id="messages" aria-live="polite">
+      <div class="msg ai"><span class="who">J.A.R.V.I.S.</span>Sistemas iniciados. Posso ajudar com estudos, planejamento, rotina e projetos. Qual é a prioridade?</div>
+    </div>
+    <form class="composer" id="chatForm">
+      <input id="prompt" maxlength="8000" placeholder="Digite uma solicitação..." autocomplete="off" required>
+      <button class="btn primary" id="send" type="submit">Enviar</button>
+    </form>
+    <div class="tools">
+      <button class="btn" id="mic">🎙 Microfone</button>
+      <button class="btn" id="voice">🔊 Voz: ativa</button>
+      <button class="btn" id="clearChat">Limpar chat</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="section-label">02 / CENTRAL DE TAREFAS</div>
+    <h3 style="margin-top:0">Missões pessoais</h3>
+    <div class="subtitle">As tarefas ficam salvas neste navegador.</div>
+    <form class="task-add" id="taskForm" style="margin-top:14px">
+      <input id="taskInput" maxlength="180" placeholder="Nova tarefa..." required>
+      <button class="btn primary" type="submit">+</button>
+    </form>
+    <div class="tasks" id="tasks"></div>
+  </section>
+
+  <section class="panel">
+    <div class="section-label">03 / MEMÓRIA DO DISPOSITIVO</div>
+    <h3 style="margin-top:0">Memória local</h3>
+    <div class="subtitle">O histórico da conversa e as tarefas podem ficar armazenados no navegador deste dispositivo. Isso não sincroniza automaticamente com outros dispositivos.</div>
+    <div class="tools">
+      <button class="btn" id="export">Exportar dados</button>
+      <button class="btn" id="clearData">Apagar memória local</button>
+    </div>
+    <div class="subtitle" id="memoryStatus" style="margin-top:12px">Memória local inicializada.</div>
+  </section>
+</div>
+<div class="footer">J.A.R.V.I.S. // PERSONAL ASSISTANT INTERFACE // BUILD 001</div>
+</main>
+
+<script>
+const API_URL = "https://jarvis-ai-api.vendaem24horas8.workers.dev/";
+
+const $ = id => document.getElementById(id);
+const safeRead = (key, fallback) => {
+  try {
+    const value = localStorage.getItem(key);
+    return value === null ? fallback : JSON.parse(value);
+  } catch { return fallback; }
+};
+const save = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    $("memoryStatus").textContent = "Dados salvos neste navegador.";
+  } catch {
+    $("memoryStatus").textContent = "Não foi possível salvar dados localmente.";
+  }
+};
+
+let history = safeRead("jarvis_history", []);
+let tasks = safeRead("jarvis_tasks", []);
+let voiceEnabled = true;
+let busy = false;
+
+function setStatus(text, state = "STANDBY") {
+  $("status").textContent = "● " + text;
+  $("coreState").textContent = state;
+  $("corePanel").classList.toggle("thinking", state === "PENSANDO");
+  $("coreStatus").textContent = text;
+}
+
+function addMessage(role, text, persist = true) {
+  const el = document.createElement("div");
+  el.className = "msg " + (role === "user" ? "user" : "ai");
+  const who = document.createElement("span");
+  who.className = "who";
+  who.textContent = role === "user" ? "VOCÊ" : "J.A.R.V.I.S.";
+  const content = document.createElement("div");
+  content.textContent = text;
+  el.append(who, content);
+  $("messages").append(el);
+  $("messages").scrollTop = $("messages").scrollHeight;
+
+  if (persist) {
+    history.push({ role, text });
+    history = history.slice(-30);
+    save("jarvis_history", history);
+  }
+}
+
+function speak(text) {
+  if (!voiceEnabled || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "pt-BR";
+  utterance.rate = 1;
+  window.speechSynthesis.speak(utterance);
+}
+
+async function sendMessage(message) {
+  if (busy) return;
+  busy = true;
+  $("send").disabled = true;
+  $("aiState").textContent = "PROCESSANDO";
+  setStatus("PROCESSANDO SOLICITAÇÃO", "PENSANDO");
+  addMessage("user", message);
+  $("prompt").value = "";
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message,
+        history: history.slice(-12, -1)
+      })
+    });
+
+    let data;
+    try { data = await response.json(); }
+    catch { throw new Error("Resposta inválida do servidor."); }
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.details || data.error || "Falha na API.");
+    }
+
+    const answer = String(data.answer || "Não recebi uma resposta textual.");
+    addMessage("model", answer);
+    $("aiState").textContent = "CONECTADO";
+    setStatus("RESPOSTA RECEBIDA", "STANDBY");
+    speak(answer);
+  } catch (err) {
+    addMessage("model", "Não consegui completar a solicitação: " + err.message);
+    $("aiState").textContent = "VERIFICAR";
+    setStatus("FALHA NA CONEXÃO", "STANDBY");
+  } finally {
+    busy = false;
+    $("send").disabled = false;
+    $("prompt").focus();
+  }
+}
+
+$("chatForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const message = $("prompt").value.trim();
+  if (message) sendMessage(message);
+});
+
+function renderTasks() {
+  $("tasks").replaceChildren();
+  if (!tasks.length) {
+    const empty = document.createElement("div");
+    empty.className = "subtitle";
+    empty.textContent = "Nenhuma missão cadastrada.";
+    $("tasks").append(empty);
+    return;
+  }
+  tasks.forEach((task, index) => {
+    const row = document.createElement("label");
+    row.className = "task" + (task.done ? " done" : "");
+    const check = document.createElement("input");
+    check.type = "checkbox";
+    check.checked = !!task.done;
+    check.addEventListener("change", () => {
+      tasks[index].done = check.checked;
+      save("jarvis_tasks", tasks);
+      renderTasks();
+    });
+    const name = document.createElement("span");
+    name.textContent = task.text;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.setAttribute("aria-label", "Excluir tarefa");
+    remove.addEventListener("click", () => {
+      tasks.splice(index, 1);
+      save("jarvis_tasks", tasks);
+      renderTasks();
+    });
+    row.append(check, name, remove);
+    $("tasks").append(row);
+  });
+}
+
+$("taskForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const text = $("taskInput").value.trim();
+  if (!text) return;
+  tasks.push({ text, done: false });
+  save("jarvis_tasks", tasks);
+  $("taskInput").value = "";
+  renderTasks();
+});
+
+$("mic").addEventListener("click", () => {
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Recognition) {
+    addMessage("model", "O reconhecimento de voz não está disponível neste navegador. Tente um navegador compatível ou use o campo de texto.");
+    return;
+  }
+  const recognition = new Recognition();
+  recognition.lang = "pt-BR";
+  recognition.onstart = () => {
+    $("corePanel").classList.add("listening");
+    setStatus("OUVINDO", "ESCUTANDO");
+    $("mic").textContent = "🎙 Ouvindo...";
+  };
+  recognition.onresult = event => {
+    $("prompt").value = event.results[0][0].transcript;
+    $("prompt").focus();
+  };
+  recognition.onerror = () => setStatus("MICROFONE INDISPONÍVEL");
+  recognition.onend = () => {
+    $("corePanel").classList.remove("listening");
+    $("mic").textContent = "🎙 Microfone";
+    setStatus("SISTEMA ONLINE");
+  };
+  recognition.start();
+});
+
+$("voice").addEventListener("click", () => {
+  voiceEnabled = !voiceEnabled;
+  $("voice").textContent = voiceEnabled ? "🔊 Voz: ativa" : "🔇 Voz: desativada";
+  if (!voiceEnabled && "speechSynthesis" in window) window.speechSynthesis.cancel();
+});
+
+$("clearChat").addEventListener("click", () => {
+  if (!confirm("Apagar o histórico da conversa deste navegador?")) return;
+  history = [];
+  save("jarvis_history", history);
+  $("messages").replaceChildren();
+  addMessage("model", "Histórico limpo. Sistemas prontos.", false);
+});
+
+$("export").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify({ history, tasks }, null, 2)], {type:"application/json"});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "jarvis-backup.json";
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
+$("clearData").addEventListener("click", () => {
+  if (!confirm("Apagar o histórico e as tarefas salvos neste navegador?")) return;
+  localStorage.removeItem("jarvis_history");
+  localStorage.removeItem("jarvis_tasks");
+  history = [];
+  tasks = [];
+  $("messages").replaceChildren();
+  addMessage("model", "Memória local apagada.", false);
+  renderTasks();
+  $("memoryStatus").textContent = "Memória local apagada.";
+});
+
+history.slice(-20).forEach(item => {
+  if (item && ["user", "model"].includes(item.role) && typeof item.text === "string") {
+    addMessage(item.role, item.text, false);
+  }
+});
+renderTasks();
+</script>
+</body>
+</html>
